@@ -4,6 +4,7 @@ import com.codeborne.selenide.CollectionCondition;
 import com.codeborne.selenide.Condition;
 import com.codeborne.selenide.Configuration;
 import com.codeborne.selenide.Selenide;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -17,17 +18,8 @@ import static com.codeborne.selenide.Selenide.*;
 
     public class ParamTest {
         @BeforeEach
-        void setUp() {
-            Configuration.baseUrl = "http://mirinstrumenta63.ru";
-        }
-        @ValueSource(strings= {
-                "Контакты", "Доставка", "Оплата", "Возврат товара"} )
-
-        @ParameterizedTest(name = "тестирование раздела {0}")
-        void headButtonsTest( String razdel) {
-            Selenide.open("");
-            $$x("//ul//li//a").findBy(Condition.text(razdel)).click();
-            $("h1").shouldHave(Condition.text(razdel));
+        void openPage() {
+            Selenide.open("http://mirinstrumenta63.ru");
         }
         static Stream<Arguments> sideMenuTest() {
             return Stream.of(
@@ -38,9 +30,17 @@ import static com.codeborne.selenide.Selenide.*;
         @MethodSource
         @ParameterizedTest(name = "тестирование отображения раздела в боковом меню")
         void sideMenuTest(List<String> result) {
-            Selenide.open("/category/svarochnoe-oborudovanie/");
+            $$(".cat-menu__el-link").findBy(Condition.text("Сварочное оборудование")).click();
             $$(".js-category-link").filter(visible)
-            .shouldHave(CollectionCondition.texts(result));
+             .shouldHave(CollectionCondition.texts(result));
+        }
+        @ValueSource(strings= {
+                "Контакты", "Доставка", "Оплата", "Возврат товара"} )
+
+        @ParameterizedTest(name = "тестирование раздела {0}")
+        void headButtonsTest( String razdel) {
+            $$x("//ul//li//a").findBy(Condition.text(razdel)).click();
+            $("h1").shouldHave(Condition.text(razdel));
         }
         @CsvSource (value = {
                 "Электродрель, Поиск по запросу Электродрель",
@@ -48,7 +48,6 @@ import static com.codeborne.selenide.Selenide.*;
 
         @ParameterizedTest(name = "тестирование выдачи при поиске: {0} ")
         void searchTest (String razdel, String result) {
-            Selenide.open("");
             $("[placeholder='Поиск по каталогу']").setValue(razdel).pressEnter();
             $("h1").shouldHave(Condition.text(result));
        }
